@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#8B5E3C">
+<title>SpendSnap AI — Smart Expense Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- ============ AUTH VIEW ============ -->
+<div id="auth-view" class="auth-wrap">
+  <div class="auth-card">
+    <div class="auth-brand">
+      <span class="dot"></span>
+      <span class="serif" style="font-size:22px; font-weight:600;">SpendSnap AI</span>
+    </div>
+    <h1 class="serif auth-title" id="auth-title">Welcome back</h1>
+    <p class="auth-sub" id="auth-sub">Sign in to see your money, insights and goals.</p>
+
+    <div class="auth-tabs" role="tablist">
+      <button class="auth-tab active" id="tab-login" data-role="login">Sign in</button>
+      <button class="auth-tab" id="tab-signup" data-role="signup">Create account</button>
+    </div>
+
+    <form id="login-form" class="auth-form" novalidate>
+      <div class="field">
+        <label for="login-email">Email</label>
+        <input class="field-input" id="login-email" type="email" placeholder="you@mail.com" autocomplete="email" required>
+        <div class="error" data-err>Enter a valid email address.</div>
+      </div>
+      <div class="field">
+        <label for="login-pass">Password</label>
+        <input class="field-input" id="login-pass" type="password" placeholder="••••••••" autocomplete="current-password" required>
+        <div class="error" data-err>Password must be at least 8 characters.</div>
+      </div>
+      <button class="pill pill-primary" type="submit" style="width:100%; justify-content:center;">Sign in</button>
+      <div class="form-note" id="login-note"></div>
+    </form>
+
+    <form id="signup-form" class="auth-form" style="display:none;" novalidate>
+      <div class="field">
+        <label for="su-name">Full name</label>
+        <input class="field-input" id="su-name" type="text" placeholder="Your Name" autocomplete="name" required>
+        <div class="error" data-err>Enter your full name.</div>
+      </div>
+      <div class="field">
+        <label for="su-email">Email</label>
+        <input class="field-input" id="su-email" type="email" placeholder="you@mail.com" autocomplete="email" required>
+        <div class="error" data-err>Enter a valid email address.</div>
+      </div>
+      <div class="field">
+        <label for="su-pass">Password</label>
+        <input class="field-input" id="su-pass" type="password" placeholder="Min 8 characters" autocomplete="new-password" required>
+        <div class="error" data-err>Password must be at least 8 characters.</div>
+      </div>
+      <button class="pill pill-primary" type="submit" style="width:100%; justify-content:center;">Create account</button>
+      <div class="form-note" id="signup-note"></div>
+    </form>
+
+    <div class="auth-hint">
+      <span class="mono">Demo:</span> demo@spendsnap.com / demo12345
+    </div>
+  </div>
+</div>
+
+<!-- ============ APP VIEW ============ -->
+<div id="app-view" hidden>
+  <nav class="app-nav">
+    <a class="brandmark" href="#" id="brand-home">
+      <span class="dot"></span><span class="serif">SpendSnap AI</span>
+    </a>
+    <div class="navlinks" id="nav-links">
+      <a href="#dashboard" data-view="dashboard" class="active">Dashboard</a>
+      <a href="#transactions" data-view="transactions">Transactions</a>
+      <a href="#analytics" data-view="analytics">Analytics</a>
+      <a href="#budget" data-view="budget">Budget</a>
+      <a href="#goals" data-view="goals">Goals</a>
+      <a href="#insights" data-view="insights">Insights</a>
+      <a href="#notifications" data-view="notifications">Alerts</a>
+      <a href="#profile" data-view="profile">Profile</a>
+    </div>
+    <div class="nav-user">
+      <span class="mini-avatar" id="nav-avatar"></span>
+      <span id="nav-name" class="nav-name">—</span>
+      <button class="pill pill-ghost" id="logout-btn" style="padding:9px 18px; font-size:12.5px;">Log out</button>
+    </div>
+  </nav>
+
+  <main class="app-main">
+
+    <!-- Dashboard -->
+    <section id="view-dashboard" class="view">
+      <div class="view-head">
+        <div>
+          <div class="eyebrow">Overview · <span id="dash-month"></span></div>
+          <h1 class="serif" style="font-size:clamp(24px,3vw,34px); margin-top:6px;">Good day<span id="dash-name"></span></h1>
+        </div>
+        <button class="pill pill-primary" id="dash-add-tx">+ Add transaction</button>
+      </div>
+
+      <div class="balance-card" id="dash-balance">
+        <div class="balance-top">
+          <span class="balance-label">Total Balance</span>
+          <span class="balance-badge" id="dash-month-badge"></span>
+        </div>
+        <div class="balance-amt" id="dash-total-balance">—</div>
+        <div class="balance-stats">
+          <div class="bstat"><span>Income</span><b class="up" id="dash-income">—</b></div>
+          <div class="bstat"><span>Expenses</span><b class="down" id="dash-expense">—</b></div>
+          <div class="bstat"><span>Invested</span><b class="inv" id="dash-invested">—</b></div>
+          <div class="bstat"><span>Budget left</span><b id="dash-budget-left">—</b></div>
+        </div>
+      </div>
+
+      <div class="grid2">
+        <div class="panel">
+          <div class="panel-head">
+            <h3 class="serif">Spending by category</h3>
+            <span class="panel-sub" id="dash-cat-total"></span>
+          </div>
+          <div id="dash-categories"><div class="empty">No expenses yet this month.</div></div>
+        </div>
+        <div class="panel">
+          <div class="panel-head">
+            <h3 class="serif">Budget</h3>
+            <span class="panel-sub" id="dash-budget-pct"></span>
+          </div>
+          <div class="budget-progress"><div id="dash-budget-bar"></div></div>
+          <div class="cat-row"><span>Spent</span><b id="dash-budget-spent">—</b></div>
+          <div class="cat-row"><span>Monthly budget</span><b id="dash-budget-total">—</b></div>
+          <div class="cat-row"><span>Saving goal</span><b id="dash-saving-goal">—</b></div>
+        </div>
+      </div>
+
+      <div class="grid2">
+        <div class="panel">
+          <div class="panel-head">
+            <h3 class="serif">Recent transactions</h3>
+            <a class="linky" href="#transactions" data-view="transactions">View all</a>
+          </div>
+          <div id="dash-recent"></div>
+        </div>
+        <div class="panel">
+          <div class="panel-head">
+            <h3 class="serif">Spending — last 6 months</h3>
+            <span class="panel-sub" id="dash-summary-sub"></span>
+          </div>
+          <div class="barchart" id="dash-chart"></div>
+        </div>
+      </div>
+
+      <div class="grid2" style="margin-top:24px;">
+        <div class="panel">
+          <div class="panel-head">
+            <h3 class="serif">Investments</h3>
+            <span class="panel-sub" id="dash-invest-total"></span>
+          </div>
+          <div id="dash-investments"><div class="empty">No investments yet this month.</div></div>
+        </div>
+        <div class="panel">
+          <div class="panel-head">
+            <h3 class="serif">Savings goals</h3>
+            <a class="linky" href="#goals" data-view="goals">Manage</a>
+          </div>
+          <div id="dash-goals"></div>
+        </div>
+      </div>
+
+      <div class="grid2" style="margin-top:24px;">
+        <div class="panel">
+          <div class="panel-head">
+            <h3 class="serif">AI insights</h3>
+            <a class="linky" href="#insights" data-view="insights">All insights</a>
+          </div>
+          <div id="dash-insights"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Transactions -->
+    <section id="view-transactions" class="view" hidden>
+      <div class="view-head">
+        <div>
+          <div class="eyebrow">Ledger</div>
+          <h1 class="serif" style="font-size:clamp(24px,3vw,34px); margin-top:6px;">Transactions</h1>
+        </div>
+        <button class="pill pill-primary" id="tx-add">+ Add transaction</button>
+      </div>
+
+      <div class="panel">
+        <div class="filters">
+          <div class="field" style="flex:1; min-width:180px;">
+            <input class="field-input" id="tx-search" type="search" placeholder="Search note, category, method…">
+          </div>
+          <div class="field">
+            <select class="field-input" id="tx-type">
+              <option value="">All types</option>
+              <option>Income</option>
+              <option>Expense</option>
+              <option>Investment</option>
+            </select>
+          </div>
+          <div class="field">
+            <select class="field-input" id="tx-category">
+              <option value="">All categories</option>
+            </select>
+          </div>
+          <div class="field">
+            <input class="field-input" id="tx-month" type="month">
+          </div>
+          <button class="pill pill-ghost" id="tx-export" style="padding:12px 20px;">⬇ CSV</button>
+        </div>
+
+        <div class="table-wrap">
+          <table class="tx-table">
+            <thead>
+              <tr>
+                <th>Date</th><th>Type</th><th>Category</th><th>Note</th><th>Method</th><th style="text-align:right;">Amount</th><th></th>
+              </tr>
+            </thead>
+            <tbody id="tx-body"></tbody>
+          </table>
+          <div id="tx-empty" class="empty" hidden>No transactions match your filters.</div>
+        </div>
+
+        <div class="pager" id="tx-pager"></div>
+      </div>
+    </section>
+
+    <!-- Analytics -->
+    <section id="view-analytics" class="view" hidden>
+      <div class="view-head">
+        <div>
+          <div class="eyebrow">Reports</div>
+          <h1 class="serif" style="font-size:clamp(24px,3vw,34px); margin-top:6px;">Analytics</h1>
+        </div>
+        <div class="seg">
+          <button data-a="daily" class="active">Daily</button>
+          <button data-a="weekly">Weekly</button>
+          <button data-a="monthly">Monthly</button>
+          <button data-a="yearly">Yearly</button>
+        </div>
+      </div>
+      <div class="grid2" style="margin-top:8px;">
+        <div class="panel">
+          <div class="panel-head">
+            <h3 class="serif" id="an-chart-title">Spending</h3>
+            <span class="panel-sub" id="an-chart-sub"></span>
+          </div>
+          <div class="barchart" id="an-chart" style="min-height:260px;"></div>
+        </div>
+        <div class="panel">
+          <div class="panel-head">
+            <h3 class="serif">Filters</h3>
+          </div>
+          <div class="field">
+            <label for="an-type">Transaction type</label>
+            <select class="field-input" id="an-type">
+              <option value="">All types</option>
+              <option>Income</option>
+              <option>Expense</option>
+              <option>Investment</option>
+            </select>
+          </div>
+          <div id="an-range" class="an-range">
+            <div class="field">
+              <label for="an-from">From</label>
+              <input class="field-input" id="an-from" type="date">
+            </div>
+            <div class="field">
+              <label for="an-to">To</label>
+              <input class="field-input" id="an-to" type="date">
+            </div>
+          </div>
+          <button class="pill pill-ghost" id="an-apply" style="margin-top:6px;">Refresh chart</button>
+          <div class="an-totals" id="an-totals"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Budget -->
+    <section id="view-budget" class="view" hidden>
+      <div class="view-head">
+        <div>
+          <div class="eyebrow">Budgeting</div>
+          <h1 class="serif" style="font-size:clamp(24px,3vw,34px); margin-top:6px;">Monthly budget</h1>
+        </div>
+        <span class="pill pill-ghost mono" id="bud-month">—</span>
+      </div>
+      <div class="grid2">
+        <div class="panel">
+          <div class="panel-head"><h3 class="serif">This month</h3></div>
+          <div class="budget-progress big"><div id="bud-bar"></div></div>
+          <div class="cat-row"><span>Spent</span><b id="bud-spent">—</b></div>
+          <div class="cat-row"><span>Remaining</span><b id="bud-remaining">—</b></div>
+          <div class="cat-row"><span>Monthly limit</span><b id="bud-limit">—</b></div>
+          <div class="cat-row"><span>Status</span><b id="bud-status">—</b></div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><h3 class="serif">Update budget</h3></div>
+          <form id="budget-form" novalidate>
+            <div class="field">
+              <label for="bud-monthly">Monthly budget limit</label>
+              <input class="field-input" id="bud-monthly" type="number" min="0" step="0.01" required>
+            </div>
+            <div class="field">
+              <label for="bud-saving">Savings goal (this month)</label>
+              <input class="field-input" id="bud-saving" type="number" min="0" step="0.01">
+            </div>
+            <div class="field">
+              <label for="bud-month-pick">Month</label>
+              <input class="field-input" id="bud-month-pick" type="month">
+            </div>
+            <button class="pill pill-primary" type="submit" style="margin-top:4px;">Save budget</button>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- Goals -->
+    <section id="view-goals" class="view" hidden>
+      <div class="view-head">
+        <div>
+          <div class="eyebrow">Savings</div>
+          <h1 class="serif" style="font-size:clamp(24px,3vw,34px); margin-top:6px;">Goals</h1>
+        </div>
+        <button class="pill pill-primary" id="goal-add">+ New goal</button>
+      </div>
+      <div id="goals-grid" class="goals-grid"></div>
+      <div id="goals-empty" class="empty">No goals yet. Create one to start saving towards something.</div>
+    </section>
+
+    <!-- Insights -->
+    <section id="view-insights" class="view" hidden>
+      <div class="view-head">
+        <div>
+          <div class="eyebrow">AI money coach</div>
+          <h1 class="serif" style="font-size:clamp(24px,3vw,34px); margin-top:6px;">Insights</h1>
+        </div>
+        <button class="pill pill-ghost" id="insights-refresh">↻ Regenerate</button>
+      </div>
+      <div id="insights-list"></div>
+    </section>
+
+    <!-- Notifications -->
+    <section id="view-notifications" class="view" hidden>
+      <div class="view-head">
+        <div>
+          <div class="eyebrow">In-app alerts</div>
+          <h1 class="serif" style="font-size:clamp(24px,3vw,34px); margin-top:6px;">Notifications</h1>
+        </div>
+        <button class="pill pill-ghost" id="notif-read-all">Mark all read</button>
+      </div>
+      <div id="notif-list"></div>
+    </section>
+
+    <!-- Profile -->
+    <section id="view-profile" class="view" hidden>
+      <div class="view-head">
+        <div>
+          <div class="eyebrow">Account</div>
+          <h1 class="serif" style="font-size:clamp(24px,3vw,34px); margin-top:6px;">Profile</h1>
+        </div>
+      </div>
+      <div class="grid2">
+        <div class="panel">
+          <div class="panel-head"><h3 class="serif">Account details</h3></div>
+          <div id="profile-info"></div>
+          <form id="profile-form" class="stacked-form" novalidate>
+            <div class="field">
+              <label for="pf-name">Full name</label>
+              <input class="field-input" id="pf-name" required>
+            </div>
+            <div class="field">
+              <label for="pf-phone">Phone</label>
+              <input class="field-input" id="pf-phone">
+            </div>
+            <div class="field">
+              <label for="pf-currency">Currency</label>
+              <select class="field-input" id="pf-currency">
+                <option>INR</option><option>USD</option><option>EUR</option><option>GBP</option><option>AED</option><option>SGD</option>
+              </select>
+            </div>
+            <button class="pill pill-primary" type="submit">Save profile</button>
+          </form>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><h3 class="serif">Change password</h3></div>
+          <form id="password-form" class="stacked-form" novalidate>
+            <div class="field">
+              <label for="cp-current">Current password</label>
+              <input class="field-input" id="cp-current" type="password" required>
+            </div>
+            <div class="field">
+              <label for="cp-new">New password</label>
+              <input class="field-input" id="cp-new" type="password" minlength="8" required>
+            </div>
+            <button class="pill pill-primary" type="submit">Update password</button>
+          </form>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- ============ MODALS ============ -->
+<div id="modal-backdrop" class="modal-overlay" hidden>
+  <div class="modal" role="dialog" aria-modal="true">
+    <div class="modal-head">
+      <h3 class="serif" id="modal-title">Add transaction</h3>
+      <button class="modal-x" id="modal-close" aria-label="Close">&times;</button>
+    </div>
+    <div id="modal-body"></div>
+  </div>
+</div>
+
+<!-- Quick Add chooser -->
+<div id="quick-modal" class="modal-overlay" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="quick-title">
+    <div class="modal-head">
+      <h3 class="serif" id="quick-title">What would you like to add?</h3>
+      <button class="modal-x" id="quick-close" aria-label="Close">&times;</button>
+    </div>
+    <div class="quick-grid">
+      <button type="button" class="quick-opt" data-quick="expense">
+        <span class="q-ico">💸</span><b>Add Expense</b><small>Log a purchase — attach a receipt</small>
+      </button>
+      <button type="button" class="quick-opt" data-quick="income">
+        <span class="q-ico">💰</span><b>Add Income</b><small>Salary, freelancing, pocket money</small>
+      </button>
+      <button type="button" class="quick-opt" data-quick="investment">
+        <span class="q-ico">📈</span><b>Add Investment</b><small>Stocks, mutual funds, gold, crypto, FD</small>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Add / Edit Expense Modal -->
+<div id="exp-modal" class="modal-overlay" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="exp-title">
+    <div class="modal-head">
+      <h3 class="serif" id="exp-title">Add Expense</h3>
+      <button class="modal-x" id="exp-close" aria-label="Close">&times;</button>
+    </div>
+    <form id="exp-form" class="modal-form" novalidate>
+      <div class="modal-row">
+        <div class="field"><label for="e-amount">Amount</label>
+          <input class="field-input" id="e-amount" type="number" min="0.01" step="0.01" placeholder="0.00" required>
+        </div>
+        <div class="field"><label for="e-category">Category</label>
+          <select class="field-input" id="e-category" required></select>
+        </div>
+      </div>
+      <div class="modal-row">
+        <div class="field"><label for="e-date">Date</label>
+          <input class="field-input" id="e-date" type="date" required>
+        </div>
+        <div class="field"><label for="e-payment">Payment method</label>
+          <select class="field-input" id="e-payment" required></select>
+        </div>
+      </div>
+      <div class="field"><label for="e-note">Notes</label>
+        <input class="field-input" id="e-note" type="text" maxlength="200" placeholder="Optional notes…">
+      </div>
+      <div class="field"><label for="e-receipt">Receipt (optional)</label>
+        <input class="field-input file" id="e-receipt" type="file" accept="image/jpeg,image/png,image/webp,image/gif,application/pdf">
+        <div class="field-hint" id="e-receipt-name"></div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="pill pill-ghost" id="exp-cancel">Cancel</button>
+        <button type="submit" class="pill pill-primary" id="exp-submit">Save expense</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Add / Edit Income Modal -->
+<div id="inc-modal" class="modal-overlay" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="inc-title">
+    <div class="modal-head">
+      <h3 class="serif" id="inc-title">Add Income</h3>
+      <button class="modal-x" id="inc-close" aria-label="Close">&times;</button>
+    </div>
+    <form id="inc-form" class="modal-form" novalidate>
+      <div class="modal-row">
+        <div class="field"><label for="i-amount">Amount</label>
+          <input class="field-input" id="i-amount" type="number" min="0.01" step="0.01" placeholder="0.00" required>
+        </div>
+        <div class="field"><label for="i-source">Source</label>
+          <select class="field-input" id="i-source" required></select>
+        </div>
+      </div>
+      <div class="modal-row">
+        <div class="field"><label for="i-date">Date</label>
+          <input class="field-input" id="i-date" type="date" required>
+        </div>
+        <div class="field"><label for="i-payment">Payment method</label>
+          <select class="field-input" id="i-payment" required></select>
+        </div>
+      </div>
+      <div class="field"><label for="i-note">Notes</label>
+        <input class="field-input" id="i-note" type="text" maxlength="200" placeholder="Optional notes…">
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="pill pill-ghost" id="inc-cancel">Cancel</button>
+        <button type="submit" class="pill pill-primary" id="inc-submit">Save income</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Add / Edit Investment Modal -->
+<div id="inv-modal" class="modal-overlay" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="inv-title">
+    <div class="modal-head">
+      <h3 class="serif" id="inv-title">Add Investment</h3>
+      <button class="modal-x" id="inv-close" aria-label="Close">&times;</button>
+    </div>
+    <form id="inv-form" class="modal-form" novalidate>
+      <div class="modal-row">
+        <div class="field"><label for="v-asset">Asset type</label>
+          <select class="field-input" id="v-asset" required></select>
+        </div>
+        <div class="field"><label for="v-amount">Amount</label>
+          <input class="field-input" id="v-amount" type="number" min="0.01" step="0.01" placeholder="0.00" required>
+        </div>
+      </div>
+      <div class="field"><label for="v-date">Date</label>
+        <input class="field-input" id="v-date" type="date" required>
+      </div>
+      <div class="field"><label for="v-note">Notes</label>
+        <input class="field-input" id="v-note" type="text" maxlength="200" placeholder="Optional notes…">
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="pill pill-ghost" id="inv-cancel">Cancel</button>
+        <button type="submit" class="pill pill-primary" id="inv-submit">Save investment</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script src="app.js"></script>
+</body>
+</html>
