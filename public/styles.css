@@ -16,6 +16,7 @@
   --shadow-lift:0 30px 80px -25px rgba(107,72,44,0.35);
 }
 *{box-sizing:border-box; margin:0; padding:0;}
+[hidden]{display:none !important;}
 html{scroll-behavior:smooth;}
 body{
   background:
@@ -32,11 +33,11 @@ body{
 ::selection{background:var(--gold-soft); color:var(--primary-dark);}
 :focus-visible{outline:3px solid rgba(139,94,60,0.45); outline-offset:3px; border-radius:8px;}
 
-.dot{
-  width:30px;height:30px;border-radius:10px;flex-shrink:0;display:inline-block;
-  background:linear-gradient(135deg,var(--gold),var(--primary));
+.logo{
+  width:32px;height:32px;border-radius:9px;flex-shrink:0;display:inline-block;
   box-shadow:0 6px 16px -4px rgba(139,94,60,0.6);
 }
+.auth-brand .logo{width:42px;height:42px;border-radius:12px;}
 .pill{
   border-radius:999px; padding:13px 26px; font-weight:600; font-size:14px;
   border:none; cursor:pointer; display:inline-flex; align-items:center; gap:8px;
