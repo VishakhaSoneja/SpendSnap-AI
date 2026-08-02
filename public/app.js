@@ -922,6 +922,32 @@ function sessionExpired() {
   toast('Session expired — please sign in again.', true);
 }
 
+/* ================= Theme ================= */
+const THEME_KEY = 'ss_theme';
+function setTheme(theme) {
+  const dark = theme === 'dark';
+  document.documentElement.classList.toggle('dark', dark);
+  localStorage.setItem(THEME_KEY, theme);
+  $$('.theme-toggle').forEach((btn) => {
+    btn.textContent = dark ? '☀️' : '🌙';
+    btn.setAttribute('aria-label', dark ? 'Switch to light mode' : 'Switch to dark mode');
+    btn.title = dark ? 'Switch to light mode' : 'Switch to dark mode';
+  });
+}
+function initTheme() {
+  let theme = localStorage.getItem(THEME_KEY);
+  if (!theme) {
+    theme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  }
+  setTheme(theme);
+}
+document.addEventListener('click', (e) => {
+  if (e.target.closest('.theme-toggle')) {
+    setTheme(document.documentElement.classList.contains('dark') ? 'light' : 'dark');
+  }
+});
+initTheme();
+
 fillSelect('tx-category', [...new Set([...CATEGORIES, ...ASSET_TYPES])]);
 $('#tx-category').insertAdjacentHTML('afterbegin', '<option value="">All categories</option>');
 

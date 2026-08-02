@@ -1,17 +1,24 @@
-# SpendSnap AI — Backend
+# SpendSnap AI
 
-REST API for **SpendSnap AI**, a personal finance / expense tracker. Built with
-**Node.js, Express.js and SQLite** — no MongoDB.
+A production-ready **personal finance & expense tracker** with a full-stack setup:
+an Express + SQLite REST API backend and a responsive single-page frontend served
+from `public/`. No external database, no external AI required — insights are
+generated locally with rule-based logic.
 
-- JWT authentication with bcrypt password hashing
-- Transactions (Income / Expense / Investment) with categories
-- Daily, weekly, monthly & yearly analytics reports
-- Monthly budget management with automatic totals
-- Savings goals with progress tracking
-- Rule-based AI insights & in-app notifications
-- CSV export of transactions
-- Search & filter transactions
-- Input validation, rate limiting, CORS, structured error handling
+![Stack](https://img.shields.io/badge/Node.js-%3E%3D18-339933) ![Express](https://img.shields.io/badge/Express-4.x-000000) ![SQLite](https://img.shields.io/badge/SQLite-better--sqlite3-003B57) ![License](https://img.shields.io/badge/License-MIT-blue)
+
+## Features
+
+- **Transactions** — Income, Expense & Investment entries with per-type categories and receipt upload
+- **Dashboards** — balance, budget, recent activity, category breakdown, 6-month summary & investment cards
+- **Analytics** — daily, weekly, monthly & yearly reports with zero-filled series
+- **Budgets** — monthly budget with auto-recomputed totals (spent / remaining)
+- **Savings goals** — targets with progress %, add-savings and status tracking
+- **AI insights** — rule-based money insights, generated on demand (no external API)
+- **Notifications** — in-app alerts (budget warnings, milestones, seed welcome)
+- **CSV export** — download filtered transactions
+- **Auth** — JWT + bcrypt, per-user data isolation (every query is scoped to `user_id`)
+- **Hardened** — input validation, rate limiting, CORS allow-list, helmet headers, parameterized SQL
 
 ## Tech Stack
 
@@ -20,35 +27,50 @@ REST API for **SpendSnap AI**, a personal finance / expense tracker. Built with
 | Runtime    | Node.js (>= 18)                     |
 | Framework  | Express.js                          |
 | Database   | SQLite via `better-sqlite3`         |
+| Frontend   | Vanilla HTML / CSS / JS (in `public/`) |
 | Auth       | JWT (`jsonwebtoken`) + `bcryptjs`   |
 | Validation | `express-validator`                 |
-| Misc       | `dotenv`, `cors`, `helmet`, `morgan`, `express-rate-limit` |
+| Misc       | `dotenv`, `cors`, `helmet`, `morgan`, `express-rate-limit`, `multer` |
 
 ## Getting Started
 
 ```bash
 npm install
-cp .env.example .env   # then edit JWT_SECRET
+cp .env.example .env   # then set a strong JWT_SECRET
 npm start
 ```
 
-The server listens on `http://localhost:5000` (configurable via `PORT`).
+Open **http://localhost:5000** — the frontend is served from `public/`.
 
-> The SQLite database file and schema are created automatically on first start
-> (`data/spendsnap.sqlite`). No external database server required.
+> The SQLite database (`data/spendsnap.sqlite`) is created automatically on first
+> start from `db/schema.sql`. A ready-to-run demo DB is also committed.
 
-Optional — seed demo data:
+### Demo account
+
+The committed database ships with a pre-seeded demo workspace:
+
+| Field    | Value                    |
+| -------- | ------------------------ |
+| Email    | `demo@spendsnap.com`     |
+| Password | `demo12345`              |
+
+You can also re-seed it at any time:
 
 ```bash
 npm run seed
-# email: demo@spendsnap.com   password: demo12345
 ```
 
-Run tests:
+New accounts registered through the UI start with a **clean, empty dashboard**.
+
+### Run tests
 
 ```bash
 npm test
 ```
+
+The suite boots the real app against a temporary SQLite file and exercises every
+route group — auth, transactions (incl. type-aware category validation and
+cross-user isolation), budgets, goals, analytics, insights, notifications and CSV export.
 
 ## Environment Variables
 
@@ -61,39 +83,31 @@ See [.env.example](./.env.example):
 | `DB_PATH`                   | `data/spendsnap.sqlite`          | SQLite database file path            |
 | `JWT_SECRET`                | *(required)*                     | Secret used to sign JWTs             |
 | `JWT_EXPIRES_IN`            | `7d`                             | Token lifetime                       |
-| `CORS_ORIGINS`              | `http://localhost:3000`          | Comma-separated allowed origins      |
+| `CORS_ORIGINS`              | dev defaults                     | Comma-separated allowed origins      |
 | `RATE_LIMIT_WINDOW_MIN`     | `15`                             | Global rate limit window (minutes)   |
 | `RATE_LIMIT_MAX_REQUESTS`   | `300`                            | Global requests per window           |
 | `AUTH_RATE_LIMIT_MAX_REQUESTS` | `20`                          | Login/register attempts per window   |
 
-## Database Schema
-
-Tables are created automatically from [`db/schema.sql`](./db/schema.sql):
-
-- **users** — account & profile data
-- **transactions** — income / expense / investment entries
-- **budgets** — one row per user + month, with auto-computed totals
-- **goals** — savings goals with target & saved amounts
-- **ai_insights** — generated rule-based money insights (deduplicated per day)
-- **notifications** — in-app alerts
-
-Foreign keys cascade deletes; lookups are indexed on `user_id + date`, `type`,
-and `category`.
-
 ## Folder Structure
 
 ```
-backend/
-├── config/          # env + SQLite connection & schema init
-├── controllers/     # request handlers
-├── db/              # schema.sql + seed.js
-├── exports/         # CSV export helpers
-├── middleware/      # auth, validation, rate limiting, error handler
-├── models/          # SQL query layer (replaces Mongoose models)
-├── routes/          # API route definitions
-├── services/        # business logic (analytics, budgets, goals, insights…)
-├── utils/           # ApiError, asyncHandler, constants
-├── server.js        # app entry point
+spendsnap-ai/
+├── public/            # FRONTEND — single-page app (served statically)
+│   ├── index.html
+│   ├── app.js
+│   ├── styles.css
+│   └── uploads/receipts/   # receipt uploads (runtime; git-ignored)
+├── config/            # env parsing + SQLite connection & schema init
+├── controllers/       # request handlers
+├── db/                # schema.sql + seed.js + committed demo DB
+├── exports/           # CSV export helpers
+├── middleware/        # auth, validation, rate limiting, error handler, upload
+├── models/            # SQL query layer (replaces Mongoose models)
+├── routes/            # API route definitions
+├── services/          # business logic (analytics, budgets, goals, insights…)
+├── tests/             # end-to-end smoke test suite
+├── utils/             # ApiError, asyncHandler, constants
+├── server.js          # app entry point
 ├── package.json
 └── .env.example
 ```
@@ -102,7 +116,7 @@ backend/
 
 Base URL: `http://localhost:5000/api`
 
-All endpoints below (except auth & health) require the header:
+All endpoints except auth & health require:
 
 ```
 Authorization: Bearer <token>
@@ -114,7 +128,7 @@ Responses use a consistent envelope:
 { "success": true, "data": { ... } }
 ```
 
-Validation errors return `400` with:
+Validation errors return `400`:
 
 ```json
 { "success": false, "message": "Validation failed", "errors": [{ "field": "amount", "message": "…" }] }
@@ -134,26 +148,28 @@ Validation errors return `400` with:
 
 | Method | Endpoint                    | Description                          |
 | ------ | --------------------------- | ------------------------------------ |
-| POST   | `/api/transactions`         | Create (`type`, `category`, `amount`, `paymentMethod?`, `date?`, `note?`) |
+| POST   | `/api/transactions`         | Create (`type`, `category`, `amount`, `paymentMethod?`, `date?`, `note?`, `receipt?` as multipart) |
 | GET    | `/api/transactions`         | List with filters & search (below)   |
 | GET    | `/api/transactions/:id`     | Get one transaction                  |
 | PUT    | `/api/transactions/:id`     | Update one transaction               |
 | DELETE | `/api/transactions/:id`     | Delete one transaction               |
 
 List query params: `type`, `category`, `paymentMethod`, `from`, `to`, `month`
-(`YYYY-MM`), `q` (free-text search across note/category/payment method/type),
-`sort` (`-date`, `date`, `-amount`, `amount`, `-createdAt`, `createdAt`),
-`page`, `limit` (max 100).
+(`YYYY-MM`), `q` (free-text search), `sort` (`-date`, `date`, `-amount`,
+`amount`, `-createdAt`, `createdAt`), `page`, `limit` (max 100).
 
-Transaction types: `Income`, `Expense`, `Investment`.
-Categories: `Food`, `Shopping`, `Travel`, `Bills`, `Health`, `Education`,
-`Entertainment`, `Investment`, `Salary`, `Freelancing`, `Pocket Money`, `Other`.
+Transaction types: `Income`, `Expense`, `Investment` — each validates against its
+own category list:
+
+- **Expense**: `Food`, `Shopping`, `Travel`, `Bills`, `Health`, `Education`, `Entertainment`, `Other`
+- **Income**: `Salary`, `Freelancing`, `Pocket Money`, `Investment`, `Other`
+- **Investment**: `Investment`, `Stocks`, `Mutual Funds`, `Gold`, `Crypto`, `FD`, `Real Estate`, `Bonds`, `Other`
 
 ### Dashboard
 
 | Method | Endpoint       | Description                          |
 | ------ | -------------- | ------------------------------------ |
-| GET    | `/api/dashboard` | Balance, income/expense/investment totals, budget, recent transactions, category breakdown, 6-month summary |
+| GET    | `/api/dashboard` | Balance, income/expense/investment totals, budget, recent transactions, category + investment breakdowns, 6-month summary |
 
 ### Analytics (Reports)
 
@@ -175,7 +191,7 @@ Each returns a zero-filled `series` of `{ key, total, count }` buckets.
 | PUT    | `/api/budget`  | Update `monthlyBudget` / `savingGoal` |
 
 `totalSpent` and `remainingBudget` are recomputed automatically from Expense
-transactions whenever a transaction is created, updated or deleted.
+transactions on every create/update/delete.
 
 ### Savings Goals
 
@@ -192,7 +208,7 @@ transactions whenever a transaction is created, updated or deleted.
 
 | Method | Endpoint       | Description                          |
 | ------ | -------------- | ------------------------------------ |
-| GET    | `/api/ai/insights` | Generates (rule-based, no external AI) & returns the 10 latest insights |
+| GET    | `/api/ai/insights` | Generates rule-based insights on demand & returns the 10 latest |
 
 ### Notifications
 
@@ -207,8 +223,7 @@ transactions whenever a transaction is created, updated or deleted.
 | ------ | --------------------------- | ------------------------------------ |
 | GET    | `/api/export/csv`           | Downloads transactions as CSV        |
 
-Supports the same filters as the transactions list (`type`, `category`,
-`from`, `to`, `month`, `q`).
+Supports the same filters as the transactions list.
 
 ### Health
 
@@ -252,5 +267,11 @@ curl "http://localhost:5000/api/export/csv?month=2026-08" \
 
 - Passwords hashed with bcrypt (10 rounds); never returned by the API.
 - All `/api/*` routes except auth & health require a valid JWT.
+- Every query is scoped to the authenticated user (`user_id = ?`) — cross-user access returns `404`.
 - Global + auth rate limiting, CORS allow-list, helmet security headers.
 - SQL is fully parameterized (no string interpolation of user input).
+- `.env` is git-ignored; use `.env.example` as a template.
+
+## License
+
+MIT

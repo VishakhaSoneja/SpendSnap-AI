@@ -9,15 +9,21 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
+<script>
+(function(){try{var t=localStorage.getItem('ss_theme');var d=t?t==='dark':window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches;if(d)document.documentElement.classList.add('dark');}catch(e){}})();
+</script>
 </head>
 <body>
 
 <!-- ============ AUTH VIEW ============ -->
 <div id="auth-view" class="auth-wrap">
   <div class="auth-card">
-    <div class="auth-brand">
-      <span class="dot"></span>
-      <span class="serif" style="font-size:22px; font-weight:600;">SpendSnap AI</span>
+    <div class="auth-brand" style="justify-content:space-between;">
+      <div style="display:flex; align-items:center; gap:12px;">
+        <span class="dot"></span>
+        <span class="serif" style="font-size:22px; font-weight:600;">SpendSnap AI</span>
+      </div>
+      <button class="theme-toggle" type="button" aria-label="Toggle dark mode" title="Toggle dark mode">🌙</button>
     </div>
     <h1 class="serif auth-title" id="auth-title">Welcome back</h1>
     <p class="auth-sub" id="auth-sub">Sign in to see your money, insights and goals.</p>
@@ -61,10 +67,6 @@
       <button class="pill pill-primary" type="submit" style="width:100%; justify-content:center;">Create account</button>
       <div class="form-note" id="signup-note"></div>
     </form>
-
-    <div class="auth-hint">
-      <span class="mono">Demo:</span> demo@spendsnap.com / demo12345
-    </div>
   </div>
 </div>
 
@@ -87,6 +89,7 @@
     <div class="nav-user">
       <span class="mini-avatar" id="nav-avatar"></span>
       <span id="nav-name" class="nav-name">—</span>
+      <button class="theme-toggle" type="button" aria-label="Toggle dark mode" title="Toggle dark mode">🌙</button>
       <button class="pill pill-ghost" id="logout-btn" style="padding:9px 18px; font-size:12.5px;">Log out</button>
     </div>
   </nav>

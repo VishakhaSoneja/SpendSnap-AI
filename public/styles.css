@@ -99,10 +99,6 @@ select.field-input{cursor:pointer;}
 .auth-tab.active{background:#fff; color:var(--primary); box-shadow:0 4px 14px -6px rgba(107,72,44,0.25);}
 .auth-form{display:flex; flex-direction:column; gap:16px;}
 .form-note{font-size:12.5px; min-height:18px; color:var(--danger); font-weight:500; text-align:center;}
-.auth-hint{
-  margin-top:24px; font-size:11.5px; color:var(--ink-soft); text-align:center;
-  background:rgba(139,94,60,0.06); border:1px dashed var(--line); border-radius:12px; padding:10px;
-}
 
 /* ---------- App shell ---------- */
 .app-nav{
@@ -337,3 +333,57 @@ select.field-input{cursor:pointer;}
   .navlinks{order:3; width:100%; justify-content:flex-start; overflow-x:auto; -webkit-overflow-scrolling:touch;}
   .app-main{padding-top:170px;}
 }
+
+/* ---------- Theme toggle ---------- */
+.theme-toggle{
+  border:none; background:rgba(255,255,255,0.6); border:1px solid var(--line); border-radius:999px;
+  width:38px; height:38px; font-size:16px; line-height:1; cursor:pointer; flex-shrink:0;
+  display:inline-flex; align-items:center; justify-content:center; color:var(--ink);
+  transition:transform .2s ease, background .2s ease, border-color .2s ease;
+}
+.theme-toggle:hover{transform:translateY(-2px); border-color:var(--gold);}
+
+/* ---------- Dark mode ---------- */
+html.dark{
+  --bg:#17120E;
+  --primary:#C79B6E;
+  --primary-dark:#E0B88C;
+  --cream:#221A14;
+  --gold:#C79B6E;
+  --gold-soft:#4A3A29;
+  --success:#7FB77E;
+  --danger:#E76F51;
+  --ink:#F2E9DF;
+  --ink-soft:#A99A8B;
+  --line:rgba(199,155,110,0.18);
+  --shadow-soft:0 20px 60px -20px rgba(0,0,0,0.55);
+  --shadow-lift:0 30px 80px -25px rgba(0,0,0,0.6);
+}
+html.dark body{
+  background:
+    radial-gradient(1200px 600px at 10% -10%, rgba(199,155,110,0.12), transparent 60%),
+    radial-gradient(1000px 500px at 90% 0%, rgba(139,94,60,0.08), transparent 60%),
+    var(--bg);
+}
+html.dark ::selection{background:var(--gold-soft); color:var(--cream);}
+html.dark :focus-visible{outline-color:rgba(199,155,110,0.55);}
+html.dark .auth-card,
+html.dark .panel,
+html.dark .goal-card,
+html.dark .insight-card,
+html.dark .quick-opt{background:rgba(255,255,255,0.045);}
+html.dark .app-nav{background:rgba(23,18,14,0.78);}
+html.dark .field-input{background:rgba(255,255,255,0.06);}
+html.dark .field-input:focus{background:rgba(255,255,255,0.1);}
+html.dark .pill-ghost{background:rgba(255,255,255,0.06);}
+html.dark .theme-toggle{background:rgba(255,255,255,0.08);}
+html.dark .auth-tab.active,
+html.dark .seg button.active{background:#2A211A; box-shadow:0 4px 14px -6px rgba(0,0,0,0.4);}
+html.dark .navlinks a:hover{background:rgba(255,255,255,0.06);}
+html.dark .tx-table tr:hover td{background:rgba(255,255,255,0.04);}
+html.dark .icon-btn{background:rgba(199,155,110,0.14); color:var(--gold);}
+html.dark .pager button{background:rgba(199,155,110,0.14); color:var(--gold);}
+html.dark .modal-x{background:rgba(199,155,110,0.12); color:var(--gold);}
+html.dark .modal-x:hover{background:var(--primary); color:var(--cream);}
+html.dark .barchart .bc-bar.zero{background:rgba(199,155,110,0.16);}
+html.dark .toast{background:#3A2E23; color:#F2E9DF;}

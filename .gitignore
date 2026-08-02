@@ -1,19 +1,19 @@
 node_modules/
+npm-debug.log*
+*.log
 
-# SQLite database files
-data/
-*.sqlite
-*.sqlite3
-*.db-journal
-*.db-wal
-*.db-shm
-
-# Environment
+# Environment — copy .env.example to .env locally
 .env
 
-# Logs
-*.log
-npm-debug.log*
+# SQLite transient files (the main data/spendsnap.sqlite demo DB is committed)
+data/*.sqlite-wal
+data/*.sqlite-shm
+data/*.db-journal
+data/*.sqlite-journal
+
+# User-uploaded receipts (runtime files; keep the folder via .gitkeep)
+public/uploads/receipts/*
+!public/uploads/receipts/.gitkeep
 
 # OS / editor
 .DS_Store

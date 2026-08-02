@@ -19,6 +19,8 @@ app.use(
   })
 );
 
+const SPENDSNAP_RENDER_ORIGIN = 'https://spendsnap-ai.onrender.com';
+
 const isLocalDevOrigin = (origin) => {
   if (!origin || env.nodeEnv === 'production') return false;
   try {
@@ -38,6 +40,7 @@ app.use(
         !origin ||
         env.corsOrigins.includes('*') ||
         env.corsOrigins.includes(origin) ||
+        origin === SPENDSNAP_RENDER_ORIGIN ||
         isLocalDevOrigin(origin);
       if (allowed) {
         return callback(null, true);
