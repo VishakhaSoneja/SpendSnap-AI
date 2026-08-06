@@ -115,7 +115,7 @@ function switchTab(role) {
   $('#login-form').style.display = role === 'login' ? 'flex' : 'none';
   $('#signup-form').style.display = role === 'signup' ? 'flex' : 'none';
   $('#auth-title').textContent = role === 'login' ? 'Welcome back' : 'Create your account';
-  $('#auth-sub').textContent = role === 'login' ? 'Sign in to see your money, insights and goals.' : 'Start tracking expenses with SpendSnap AI.';
+  $('#auth-sub').textContent = role === 'login' ? 'Log in to see your money, insights and goals.' : 'Start tracking expenses with SpendSnap AI.';
 }
 $('#tab-login').addEventListener('click', () => switchTab('login'));
 $('#tab-signup').addEventListener('click', () => switchTab('signup'));
@@ -172,7 +172,7 @@ function logout() {
   state.token = null;
   state.user = null;
   showAuth();
-  toast('Signed out. See you soon!');
+  toast('Logged out. See you soon!');
 }
 
 $('#login-form').addEventListener('submit', doLogin);
@@ -919,7 +919,7 @@ $('#password-form').addEventListener('submit', async (e) => {
 /* ================= Init ================= */
 function sessionExpired() {
   logout();
-  toast('Session expired — please sign in again.', true);
+  toast('Session expired — please log in again.', true);
 }
 
 /* ================= Theme ================= */
@@ -951,14 +951,52 @@ initTheme();
 fillSelect('tx-category', [...new Set([...CATEGORIES, ...ASSET_TYPES])]);
 $('#tx-category').insertAdjacentHTML('afterbegin', '<option value="">All categories</option>');
 
-(async function init() {
-  if (!state.token) return showAuth();
+async function tryRestoreSession() {
   try {
     const res = await api('/auth/profile');
     state.user = res.data;
     localStorage.setItem('ss_user', JSON.stringify(state.user));
-    showApp();
+    return true;
   } catch (err) {
-    sessionExpired();
+    return err.status === 401 ? false : 'offline';
   }
+}
+
+function showSplash(message) {
+  $('#splash-text').textContent = message;
+  $('#splash').hidden = false;
+  $('#auth-view').hidden = true;
+  $('#app-view').hidden = true;
+}
+function hideSplash() { $('#splash').hidden = true; }
+
+(async function init() {
+  if (!state.token) return showAuth();
+  showSplash('Checking your session…');
+  const result = await tryRestoreSession();
+  if (result === true) { hideSplash(); return showApp(); }
+  if (result === false) { hideSplash(); return sessionExpired(); }
+
+  let attempts = 0;
+  const retry = async () => {
+    if (!state.token) return;
+    const outcome = await tryRestoreSession();
+    if (outcome === false) { hideSplash(); return sessionExpired(); }
+    if (outcome === true) {
+      hideSplash();
+      if ($('#app-view').hidden) showApp();
+      return;
+    }
+    attempts += 1;
+    if (attempts >= 4) {
+      hideSplash();
+      showAuth();
+      toast('Reconnecting… you can log in again or wait for your session to restore.', true);
+      setTimeout(retry, 10000);
+      return;
+    }
+    showSplash('Reconnecting to SpendSnap AI…');
+    setTimeout(retry, 2500 * attempts);
+  };
+  setTimeout(retry, 2500);
 })();

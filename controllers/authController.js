@@ -28,7 +28,7 @@ const register = asyncHandler(async (req, res) => {
 
   const existing = userModel.findByEmail(email.toLowerCase());
   if (existing) {
-    throw new ApiError(409, 'An account with this email already exists. Please sign in.');
+    throw new ApiError(409, 'An account with this email already exists. Please log in.');
   }
 
   const user = userModel.create({

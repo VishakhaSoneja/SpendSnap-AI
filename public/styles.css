@@ -346,6 +346,7 @@ select.field-input{cursor:pointer;}
 
 /* ---------- Dark mode ---------- */
 html.dark{
+  color-scheme: dark;
   --bg:#17120E;
   --primary:#C79B6E;
   --primary-dark:#E0B88C;
@@ -388,3 +389,28 @@ html.dark .modal-x{background:rgba(199,155,110,0.12); color:var(--gold);}
 html.dark .modal-x:hover{background:var(--primary); color:var(--cream);}
 html.dark .barchart .bc-bar.zero{background:rgba(199,155,110,0.16);}
 html.dark .toast{background:#3A2E23; color:#F2E9DF;}
+
+/* native form controls (select dropdowns, date/month pickers) in dark mode */
+html.dark select.field-input,
+html.dark input.field-input,
+html.dark textarea.field-input{background-color:rgba(255,255,255,0.06); color:var(--ink);}
+html.dark select.field-input option{background:#221A14; color:#F2E9DF;}
+
+/* ---------- Session splash ---------- */
+.splash{
+  min-height:100vh; display:flex; align-items:center; justify-content:center; padding:40px 20px;
+}
+.splash-card{
+  text-align:center; width:min(100%,340px); background:rgba(255,255,255,0.6);
+  border:1px solid var(--glass-border,#fff); border-radius:var(--radius); box-shadow:var(--shadow-lift);
+  backdrop-filter:blur(20px); padding:44px 32px;
+}
+.splash-logo{display:flex; align-items:center; justify-content:center; gap:12px; margin-bottom:26px;}
+.spinner{
+  width:34px; height:34px; margin:0 auto; border-radius:50%;
+  border:3px solid rgba(139,94,60,0.18); border-top-color:var(--primary);
+  animation:spin .9s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg);}}
+.splash-text{font-size:13.5px; margin-top:18px; color:var(--ink-soft);}
+html.dark .splash-card{background:rgba(255,255,255,0.045);}
