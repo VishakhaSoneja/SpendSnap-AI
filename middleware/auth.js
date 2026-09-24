@@ -17,7 +17,7 @@ const authenticate = asyncHandler(async (req, _res, next) => {
   try {
     payload = jwt.verify(token, env.jwtSecret);
   } catch (err) {
-    throw new ApiError(401, 'Session expired or token is invalid. Please sign in again.');
+    throw new ApiError(401, 'Session expired or token is invalid. Please log in again.');
   }
 
   const user = userModel.findById(payload.id);

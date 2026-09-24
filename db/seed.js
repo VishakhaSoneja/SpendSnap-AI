@@ -105,7 +105,7 @@ const main = () => {
 
   aiService.generateInsights(user.id);
 
-  console.log('\nSeed finished. Sign in with:');
+  console.log('\nSeed finished. Log in with:');
   console.log('  email:    demo@spendsnap.com');
   console.log('  password: demo12345');
 };

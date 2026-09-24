@@ -139,7 +139,7 @@ Validation errors return `400`:
 | Method | Endpoint                    | Description                          |
 | ------ | --------------------------- | ------------------------------------ |
 | POST   | `/api/auth/register`        | Create account (`fullName`, `email`, `password`, `phone?`, `currency?`) |
-| POST   | `/api/auth/login`           | Sign in → returns `{ user, token }`  |
+| POST   | `/api/auth/login`           | Log in → returns `{ user, token }`    |
 | GET    | `/api/auth/profile`         | Current user profile                 |
 | PUT    | `/api/auth/update-profile`  | Update `fullName`, `phone`, `profileImage`, `currency` |
 | PUT    | `/api/auth/change-password` | `currentPassword` + `newPassword`    |
