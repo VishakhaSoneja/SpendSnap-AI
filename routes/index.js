@@ -17,6 +17,7 @@ router.use('/budget', require('./budgetRoutes'));
 router.use('/goals', require('./goalRoutes'));
 router.use('/ai', require('./aiRoutes'));
 router.use('/notifications', require('./notificationRoutes'));
+router.use('/monthly-report', require('./monthlyReportRoutes'));
 router.use('/export', require('./exportRoutes'));
 
 module.exports = router;

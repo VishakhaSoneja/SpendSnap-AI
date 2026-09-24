@@ -79,6 +79,28 @@ CREATE TABLE IF NOT EXISTS notifications (
   created_at TEXT    NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS monthly_reports (
+  id                 INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id            INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  month              TEXT    NOT NULL,
+  title              TEXT    NOT NULL,
+  summary            TEXT    NOT NULL,
+  csv_data           TEXT    NOT NULL,
+  total_income       REAL    NOT NULL DEFAULT 0,
+  total_expenses     REAL    NOT NULL DEFAULT 0,
+  total_savings      REAL    NOT NULL DEFAULT 0,
+  total_investments  REAL    NOT NULL DEFAULT 0,
+  total_budget       REAL    NOT NULL DEFAULT 0,
+  total_budget_used  REAL    NOT NULL DEFAULT 0,
+  remaining_budget   REAL    NOT NULL DEFAULT 0,
+  savings_goal       REAL    NOT NULL DEFAULT 0,
+  goal_progress      INTEGER NOT NULL DEFAULT 0,
+  total_transactions INTEGER NOT NULL DEFAULT 0,
+  top_categories     TEXT    NOT NULL DEFAULT '[]',
+  generated_at       TEXT    NOT NULL,
+  UNIQUE (user_id, month)
+);
+
 -- Lookup indexes
 CREATE INDEX IF NOT EXISTS idx_transactions_user_date  ON transactions (user_id, date);
 CREATE INDEX IF NOT EXISTS idx_transactions_user_type  ON transactions (user_id, type);
@@ -87,3 +109,4 @@ CREATE INDEX IF NOT EXISTS idx_budgets_user_month      ON budgets (user_id, mont
 CREATE INDEX IF NOT EXISTS idx_goals_user              ON goals (user_id);
 CREATE INDEX IF NOT EXISTS idx_insights_user_created   ON ai_insights (user_id, created_at);
 CREATE INDEX IF NOT EXISTS idx_notifications_user_read ON notifications (user_id, is_read);
+CREATE INDEX IF NOT EXISTS idx_monthly_reports_user_month ON monthly_reports (user_id, month);

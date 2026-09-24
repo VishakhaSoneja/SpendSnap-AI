@@ -66,8 +66,27 @@ app.use(globalLimiter);
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/uploads', express.static(path.join(__dirname, 'public', 'uploads')));
 
+app.get('/health', (_req, res) => {
+  res.json({
+    success: true,
+    app: env.appName,
+    version: env.appVersion,
+    environment: env.nodeEnv,
+    uptime: process.uptime(),
+    timestamp: new Date().toISOString(),
+    message: 'SpendSnap AI server is healthy',
+  });
+});
+
 app.get('/', (_req, res) => {
-  res.json({ success: true, message: 'SpendSnap AI API — see /api for routes' });
+  res.json({
+    success: true,
+    app: env.appName,
+    version: env.appVersion,
+    environment: env.nodeEnv,
+    message: 'SpendSnap AI API — see /api for routes',
+    health: '/health',
+  });
 });
 
 app.use('/api', routes);
@@ -78,7 +97,9 @@ app.use(errorHandler);
 const server = () => {
   initDb();
   app.listen(env.port, () => {
-    console.log(`[server] SpendSnap AI API listening on http://localhost:${env.port} (${env.nodeEnv})`);
+    console.log(
+      `[server] ${env.appName} v${env.appVersion} listening on http://localhost:${env.port} (${env.nodeEnv})`
+    );
   });
 };
 

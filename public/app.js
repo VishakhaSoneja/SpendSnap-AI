@@ -183,6 +183,14 @@ $$('#login-form input, #signup-form input').forEach((inp) =>
 );
 
 /* ================= Navigation ================= */
+function getGreetingName() {
+  const hours = new Date().getHours();
+  let greeting = 'Good Evening';
+  if (hours >= 5 && hours < 12) greeting = 'Good Morning';
+  else if (hours >= 12 && hours < 17) greeting = 'Good Afternoon';
+  return `${greeting}, ${state.user ? state.user.fullName.split(' ')[0] : 'User'}`;
+}
+
 function switchView(name) {
   $$('.view').forEach((v) => { v.hidden = v.id !== 'view-' + name; });
   $$('.navlinks a').forEach((a) => a.classList.toggle('active', a.dataset.view === name));
@@ -205,11 +213,15 @@ $('#tx-add').addEventListener('click', openQuick);
 /* ================= Dashboard ================= */
 async function loadDashboard() {
   try {
+    await loadMonthEndReport();
     const res = await api('/dashboard');
     const d = res.data;
     $('#dash-month').textContent = d.month;
     $('#dash-month-badge').textContent = d.month;
-    $('#dash-name').textContent = state.user ? ', ' + state.user.fullName.split(' ')[0] : '';
+    const heading = document.querySelector('#view-dashboard .view-head h1');
+    if (heading) {
+      heading.textContent = getGreetingName();
+    }
     $('#dash-total-balance').textContent = fmt(d.totalBalance);
     $('#dash-income').textContent = '+' + fmt(d.totalIncome);
     $('#dash-expense').textContent = '-' + fmt(d.totalExpense);
@@ -264,6 +276,71 @@ async function loadDashboard() {
   }
 }
 
+async function loadMonthEndReport() {
+  try {
+    const res = await api('/monthly-report/current');
+    const data = res.data || {};
+    const panel = $('#month-end-panel');
+    if (!data.shouldShow || !data.report) {
+      panel.hidden = true;
+      panel.innerHTML = '';
+      return;
+    }
+
+    const report = data.report;
+    const nextMonth = data.nextMonth || '';
+    panel.hidden = false;
+    panel.innerHTML = `
+      <div class="month-end-header">
+        <div>
+          <div class="eyebrow">Month-end summary</div>
+          <h3 class="serif">${esc(report.title)}</h3>
+          <p>${esc(report.message)}</p>
+        </div>
+        <span class="pill pill-ghost mono">${esc(report.monthLabel || report.month)}</span>
+      </div>
+      <div class="month-end-grid">
+        <div class="month-end-metric"><span>Total income</span><b>${fmt(report.totalIncome)}</b></div>
+        <div class="month-end-metric"><span>Total expenses</span><b>${fmt(report.totalExpenses)}</b></div>
+        <div class="month-end-metric"><span>Total savings</span><b>${fmt(report.totalSavings)}</b></div>
+        <div class="month-end-metric"><span>Total investments</span><b>${fmt(report.totalInvestments)}</b></div>
+      </div>
+      <div class="month-end-summary">
+        <span>Budget: <b>${fmt(report.totalBudget)}</b></span>
+        <span>Used: <b>${fmt(report.totalBudgetUsed)}</b></span>
+        <span>Remaining: <b>${fmt(report.remainingBudget)}</b></span>
+        <span>Goal: <b>${report.goalName || 'No goal set'}</b></span>
+      </div>
+      <div class="month-end-cats">
+        ${(report.topCategories || []).length
+          ? report.topCategories.slice(0, 4).map((c) => `<span class="month-end-cat">${esc(c.category)} · ${fmt(c.total)}</span>`).join('')
+          : '<span class="month-end-cat">No expense data recorded</span>'}
+      </div>
+      <div class="month-end-actions">
+        <button class="pill pill-primary" id="month-download-csv">Download Monthly CSV</button>
+        <button class="pill pill-ghost" id="month-start-next">Start ${esc(nextMonth ? nextMonth.replace('-', ' ') : 'Next Month')}</button>
+      </div>
+    `;
+
+    $('#month-download-csv').addEventListener('click', () => downloadMonthlyCsv(data.month || report.month));
+    $('#month-start-next').addEventListener('click', () => {
+      const monthValue = nextMonth || new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1).toISOString().slice(0, 7);
+      state.budgetMonth = monthValue;
+      switchView('budget');
+      setTimeout(() => {
+        $('#bud-month-pick').value = monthValue;
+        $('#bud-month').textContent = monthValue;
+        loadBudget();
+      }, 50);
+    });
+  } catch (err) {
+    if (err.status !== 401) {
+      $('#month-end-panel').hidden = true;
+      $('#month-end-panel').innerHTML = '';
+    }
+  }
+}
+
 function txRow(t) {
   const sign = t.type === 'Expense' ? '-' : t.type === 'Investment' ? '' : '+';
   const cls = t.type === 'Expense' ? 'minus' : 'plus';
@@ -273,6 +350,27 @@ function txRow(t) {
       <div class="tx-info"><b>${esc(t.category)}${t.note ? ' · ' + esc(t.note) : ''}</b><span>${shortDate(t.date)} · ${esc(t.paymentMethod)}</span></div>
       <div class="tx-amt ${t.type === 'Expense' ? 'minus' : 'plus'}">${sign}${fmt(t.amount)}</div>
     </div>`;
+}
+
+async function downloadMonthlyCsv(month) {
+  try {
+    const qs = new URLSearchParams({ month }).toString();
+    const res = await fetch('/api/monthly-report/download?' + qs, {
+      headers: { Authorization: 'Bearer ' + state.token },
+    });
+    if (!res.ok) throw new Error('Could not download the monthly CSV.');
+    const blob = await res.blob();
+    const a = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    a.href = url;
+    const fileName = month ? `SpendSnap_${new Date(`${month}-01T00:00:00`).toLocaleString('en-US', { month: 'long' })}_${month.slice(0, 4)}.csv` : 'SpendSnap_Monthly_Report.csv';
+    a.download = fileName;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast('Monthly CSV downloaded.');
+  } catch (err) {
+    toast(err.message, true);
+  }
 }
 
 async function renderDashGoals() {

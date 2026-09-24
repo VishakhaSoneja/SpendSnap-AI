@@ -2,7 +2,10 @@ const path = require('path');
 
 require('dotenv').config({ path: path.resolve(__dirname, '..', '.env') });
 
-const required = ['JWT_SECRET'];
+const pkg = require('../package.json');
+const nodeEnv = process.env.NODE_ENV || 'development';
+const devFallbackSecret = 'dev-secret-change-me';
+const required = nodeEnv === 'production' ? ['JWT_SECRET'] : [];
 const missing = required.filter((key) => !process.env[key]);
 
 if (missing.length > 0) {
@@ -20,12 +23,14 @@ const parseOrigins = (raw) =>
     .filter(Boolean);
 
 const env = {
+  appName: 'SpendSnap AI',
+  appVersion: pkg.version,
   port: parseInt(process.env.PORT, 10) || 5000,
-  nodeEnv: process.env.NODE_ENV || 'development',
+  nodeEnv,
   dbPath: process.env.DB_PATH || path.resolve(__dirname, '..', 'data', 'spendsnap.sqlite'),
-  jwtSecret: process.env.JWT_SECRET,
+  jwtSecret: process.env.JWT_SECRET || (nodeEnv === 'production' ? undefined : devFallbackSecret),
   jwtExpiresIn: process.env.JWT_EXPIRES_IN || '7d',
-  isProduction: process.env.NODE_ENV === 'production',
+  isProduction: nodeEnv === 'production',
   corsOrigins: parseOrigins(
     process.env.CORS_ORIGINS ||
       (process.env.NODE_ENV === 'production'

@@ -196,6 +196,14 @@ const check = (name, condition, extra = '') => {
     const notifsRead = await call('/notifications?unreadOnly=true', { token });
     check('notifications marked read', notifsRead.json.data.unreadCount === 0);
 
+    // ---- Month-end report + CSV ----
+    const currentMonth = new Date().toISOString().slice(0, 7);
+    const monthReport = await call('/monthly-report/current', { token });
+    check('GET /monthly-report/current', monthReport.status === 200 && monthReport.json.data && monthReport.json.data.month === currentMonth, `status=${monthReport.status}`);
+    const monthCsv = await fetch(`${base}/monthly-report/download?month=${currentMonth}`, { headers: { Authorization: `Bearer ${token}` } });
+    const monthCsvText = await monthCsv.text();
+    check('GET /monthly-report/download', monthCsv.status === 200 && monthCsv.headers.get('content-type').includes('text/csv') && monthCsvText.includes('Date') && monthCsvText.includes('Transaction Type'));
+
     // ---- CSV export ----
     const csvRes = await fetch(`${base}/export/csv`, { headers: { Authorization: `Bearer ${token}` } });
     const csv = await csvRes.text();
